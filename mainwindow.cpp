@@ -75,19 +75,19 @@ void MainWindow::on_testBtn_clicked()
     bool ret;
     switch (selectedItem.id) {
     case 1:
-        ret = controller.readData(default_id, Protocol::REQUEST::ADDRESS, 1);
+        ret = controller.requestData(default_id, Protocol::REQUEST::ADDRESS, 1);
         break;
     case 2:
-        ret = controller.readData(default_id, Protocol::REQUEST::ADDRESS, 1);
+        ret = controller.requestData(default_id, Protocol::REQUEST::ADDRESS, 1);
         break;
     case 3:
-        ret = controller.readData(default_id, Protocol::REQUEST::ADDRESS, 2);
+        ret = controller.requestData(default_id, Protocol::REQUEST::ADDRESS, 2);
         break;
     case 4:
-        ret = controller.readData(default_id, Protocol::REQUEST::ADDRESS, 1);
+        ret = controller.requestData(default_id, Protocol::REQUEST::ADDRESS, 1);
         break;
     case 5:
-        ret = controller.readData(default_id, Protocol::REQUEST::ADDRESS, 3);
+        ret = controller.requestData(default_id, Protocol::REQUEST::ADDRESS, 3);
         break;
     }
 
@@ -105,7 +105,7 @@ void MainWindow::on_getIDBtn_clicked()
         ui->defaultID->setText("254");
     }
     else {
-        if (!controller.sendCustom0x20(0)) {
+        if (!controller.requestCustom0x20(0)) {
             qErrnoWarning("Failed to get slave id");
         }
     }
@@ -121,19 +121,19 @@ void MainWindow::sendChangeOp()
     bool ret;
     switch(default_id){
     case 1:
-        ret = controller.sendCustom0x10(default_id, new_id);
+        ret = controller.requestCustom0x10(default_id, new_id);
         break;
     case 2:
-        ret = controller.sendCustom0x10(default_id, new_id);
+        ret = controller.requestCustom0x10(default_id, new_id);
         break;
     case 3:
-        ret = controller.writeSingleData(default_id, Protocol::RK330_01::ADDRESS, new_id);
+        ret = controller.requestSingleData(default_id, Protocol::RK330_01::ADDRESS, new_id);
         break;
     case 4:
-        ret = controller.writeSingleData(default_id, Protocol::RK400_02::ADDRESS, new_id);
+        ret = controller.requestSingleData(default_id, Protocol::RK400_02::ADDRESS, new_id);
         break;
     case 5:
-        ret = controller.writeSingleData(default_id, Protocol::RK520_02::ADDRESS, new_id);
+        ret = controller.requestSingleData(default_id, Protocol::RK520_02::ADDRESS, new_id);
         break;
     }
 
