@@ -45,3 +45,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     rsc.qrc
+
+# Suppress logging output for release build
+CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
