@@ -43,6 +43,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define NMBS_SERVER_DISABLED    // FIX ME.... for editor display: after delete
+
 #ifdef __cplusplus
 extern "C" {
 #endif

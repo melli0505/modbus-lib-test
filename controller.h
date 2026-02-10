@@ -1,7 +1,11 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "nanomodbus.h"
+/* for nanoModbus Configuration Section */
+#define NMBS_SERVER_DISABLED
+
+/****************************************/
+#include "nmbs/nanomodbus.h"
 #include <QObject>
 #include <QSerialPort>
 #include <QElapsedTimer>

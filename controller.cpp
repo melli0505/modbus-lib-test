@@ -14,8 +14,8 @@ Controller::Controller()
     this->qserial = new QSerialPort();
 //    _initTimer();
     checkTimer = new QElapsedTimer();
-    if(setup_port(qserial))
-        connect(this->qserial, SIGNAL(readyRead()), this, SLOT(SLT_received()));
+
+    setup_port(qserial);
 
     nmbs_platform_conf_create(&platform_conf);
 
@@ -76,6 +76,8 @@ bool Controller::setup_port(QSerialPort* _sPort)
 
 void Controller::SLT_received()
 {
+    qDebug() << "SLT_received";
+
     if(qserial->bytesAvailable() > 0) {
         m_incomingBuffer.append(qserial->readAll());
         qDebug() << "Data buffered:" << m_incomingBuffer.toHex() << m_incomingBuffer.size();
@@ -88,38 +90,19 @@ void Controller::SLT_received()
 int32_t Controller::nmbs_read(uint8_t* buf, uint16_t count, int32_t byte_timeout_ms, void* arg) {
 
     auto self = static_cast<Controller*>(arg);
-/*
 
     if(self->qserial->bytesAvailable() < count)
         self->qserial->waitForReadyRead(100);
 
-    QCoreApplication::processEvents();
+#if 0
+    qDebug() << "request count : " << count;
+    qDebug() << "data ok : " << len;
 
+    for (int i = 0; i < len; i++)
+        qDebug("%x", buf[i]);
+#endif
 
     return self->qserial->read(reinterpret_cast<char*>(buf), count);
-*/
-
-    while (self->m_incomingBuffer.size() < count) {
-        int64_t remaining = 1000 - self->checkTimer->elapsed();
-        if (remaining <= 0) return 0;
-
-        QEventLoop loop;
-        QTimer::singleShot(10, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        if (self->qserial->bytesAvailable() > 0){
-            self->SLT_received();
-            qDebug() << "[nmbs_read][byte available] " << self->qserial->bytesAvailable();
-        }
-
-    }
-    qDebug() << "[Read] Instance Address:" << self << "Size:" << self->m_incomingBuffer.size();
-
-    memcpy(buf, self->m_incomingBuffer.constData(), count);
-    self->m_incomingBuffer.remove(0, count);
-
-    qDebug() << "[nmbs_read] count" << count;
-    return static_cast<int32_t>(count);  
 }
 
 // RTU 쓰기 콜백
