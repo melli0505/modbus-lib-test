@@ -106,7 +106,7 @@ int32_t Controller::nmbs_write(const uint8_t* buf, uint16_t count, int32_t byte_
 
 }
 // 0x03
-bool Controller::readData(int slaveID, uint16_t address, uint16_t quantity) {
+bool Controller::requestData(int slaveID, uint16_t address, uint16_t quantity) {
     if (quantity == 0) return false;
     nmbs_error err;
     QVector<uint16_t> read_regs(quantity);
@@ -126,7 +126,7 @@ bool Controller::readData(int slaveID, uint16_t address, uint16_t quantity) {
 }
 
 // 0x04
-bool Controller::readInputData(int slaveID, uint16_t address, uint16_t quantity) {
+bool Controller::requestInputData(int slaveID, uint16_t address, uint16_t quantity) {
     if (quantity == 0) return false;
     nmbs_error err;
     QVector<uint16_t> read_regs(quantity);
@@ -151,7 +151,7 @@ bool Controller::readInputData(int slaveID, uint16_t address, uint16_t quantity)
 }
 
 // 0x06
-bool Controller::writeSingleData(int slaveID, uint16_t address, uint16_t data) {
+bool Controller::requestSingleData(int slaveID, uint16_t address, uint16_t data) {
     nmbs_error err;
 
     if (qserial->isOpen()) {
@@ -173,7 +173,7 @@ bool Controller::writeSingleData(int slaveID, uint16_t address, uint16_t data) {
 }
 
 // 0x10
-bool Controller::writeMultipleData(int slaveID, uint16_t address, uint16_t quantity, uint16_t* data) {
+bool Controller::requestMultipleData(int slaveID, uint16_t address, uint16_t quantity, uint16_t* data) {
     if (quantity == 0) return false;
     nmbs_error err;
 
@@ -195,7 +195,7 @@ bool Controller::writeMultipleData(int slaveID, uint16_t address, uint16_t quant
 }
 
 // 0x10, 직접 구현 필요
-bool Controller::sendCustom0x10(int slaveID, uint8_t data) {
+bool Controller::requestCustom0x10(int slaveID, uint8_t data) {
     qDebug() << "[sendCustom0x10] started.";
     nmbs_error send_err, receive_err;
     uint8_t fc = 0x10;
@@ -226,7 +226,7 @@ bool Controller::sendCustom0x10(int slaveID, uint8_t data) {
 
 
 // 0x20, 직접 구현 필요
-bool Controller::sendCustom0x20(int slaveID) {
+bool Controller::requestCustom0x20(int slaveID) {
     nmbs_error send_err, receive_err;
     uint8_t fc = 0x20;
 
