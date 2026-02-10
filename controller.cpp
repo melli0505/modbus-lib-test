@@ -3,14 +3,13 @@
 #include <QDebug>
 #include <QSerialPortInfo>
 #include <QCoreApplication>
-#include <QEventLoop>
-#include <QThread>
 #include <QTimer>
 
 #define TIMEOUT         1000        // 1000 ms
 
 Controller::Controller()
 {
+
     this->qserial = new QSerialPort();
 //    _initTimer();
     checkTimer = new QElapsedTimer();
@@ -43,8 +42,8 @@ bool Controller::setup_port(QSerialPort* _sPort)
     foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
     {
         // microsoft 아닌 COM port 잡기
-//        if (serialPortInfo.manufacturer() != "Microsoft") {
-        if (serialPortInfo.portName() == "COM2"){
+        if (serialPortInfo.manufacturer() != "Microsoft") {
+//        if (serialPortInfo.portName() == "COM2"){
             _portName = serialPortInfo.portName();
         }
         qInfo() << "port info : " << serialPortInfo.manufacturer() << serialPortInfo.portName();
@@ -74,25 +73,13 @@ bool Controller::setup_port(QSerialPort* _sPort)
     return true;
 }
 
-void Controller::SLT_received()
-{
-    qDebug() << "SLT_received";
-
-    if(qserial->bytesAvailable() > 0) {
-        m_incomingBuffer.append(qserial->readAll());
-        qDebug() << "Data buffered:" << m_incomingBuffer.toHex() << m_incomingBuffer.size();
-        qDebug() << "[Slot] Instance Address:" << this << "Size:" << m_incomingBuffer.size();
-    }
-    checkTimer->start();
-}
-
 // RTU 읽기 콜백
 int32_t Controller::nmbs_read(uint8_t* buf, uint16_t count, int32_t byte_timeout_ms, void* arg) {
 
     auto self = static_cast<Controller*>(arg);
 
     if(self->qserial->bytesAvailable() < count)
-        self->qserial->waitForReadyRead(100);
+        self->qserial->waitForReadyRead(1000);
 
 #if 0
     qDebug() << "request count : " << count;
@@ -107,17 +94,13 @@ int32_t Controller::nmbs_read(uint8_t* buf, uint16_t count, int32_t byte_timeout
 
 // RTU 쓰기 콜백
 int32_t Controller::nmbs_write(const uint8_t* buf, uint16_t count, int32_t byte_timeout_ms, void* arg) {
-    qDebug() << "Sending Data (Hex):" << QByteArray::fromRawData((const char*)buf, count).toHex(' ') << count;
 
     auto self = static_cast<Controller*>(arg);
     self->m_incomingBuffer.clear();
     int64_t written = self->qserial->write(reinterpret_cast<const char*>(buf), count);
     if (!self->qserial->waitForBytesWritten(byte_timeout_ms)){
-        qDebug() << "[ERROR nmbs_write] " << self->qserial->errorString();
         return -1;
     }
-
-    qInfo() << "[nmbs_write] ends." << buf;
 
     return static_cast<int32_t>(written);
 
@@ -211,22 +194,32 @@ bool Controller::writeMultipleData(int slaveID, uint16_t address, uint16_t quant
     }
 }
 
-// 0x20, 직접 구현 필요
+// 0x10, 직접 구현 필요
 bool Controller::sendCustom0x10(int slaveID, uint8_t data) {
     qDebug() << "[sendCustom0x10] started.";
-    nmbs_error err;
+    nmbs_error send_err, receive_err;
     uint8_t fc = 0x10;
 
     nmbs_set_destination_rtu_address(&nmbs, slaveID);
     qDebug() << "[sendCustom0x10] set destination address.";
-    err = nmbs_send_raw_pdu(&nmbs, fc, &data, 1);
+    send_err = nmbs_send_raw_pdu(&nmbs, fc, &data, 1);
     qDebug() << "[sendCustom0x10] send raw pdu.";
-    if (err == NMBS_ERROR_NONE) {
+    if (send_err == NMBS_ERROR_NONE) {
         qDebug() << QString("0x10 성공");
-        return true;
     }
     else {
-        qDebug() << "0x10 실패: " << err ;
+        qDebug() << "0x10 실패: " << send_err ;
+    }
+
+    uint8_t receive_buffer[4];
+    receive_err = nmbs_receive_raw_pdu_response(&nmbs, receive_buffer, 0);
+
+    if (receive_err == NMBS_ERROR_NONE){
+        qDebug() << QString("0x10 응답: ") << receive_buffer[0];
+        return true;
+    }
+    else{
+        qDebug() << "0x10 응답 없음: " << receive_err ;
         return false;
     }
 }
@@ -234,18 +227,28 @@ bool Controller::sendCustom0x10(int slaveID, uint8_t data) {
 
 // 0x20, 직접 구현 필요
 bool Controller::sendCustom0x20(int slaveID) {
-    nmbs_error err;
+    nmbs_error send_err, receive_err;
     uint8_t fc = 0x20;
 
     nmbs_set_destination_rtu_address(&nmbs, slaveID);
-    err = nmbs_send_raw_pdu(&nmbs, fc, NULL, 0);
+    send_err = nmbs_send_raw_pdu(&nmbs, fc, NULL, 0);
 
-    if (err == NMBS_ERROR_NONE) {
+    if (send_err == NMBS_ERROR_NONE)
         qDebug() << QString("0x20 성공");
+    else{
+        qDebug() << "0x20 실패: " << send_err ;
+        return false;
+    }
+
+    uint8_t receive_buffer[1];
+    receive_err = nmbs_receive_raw_pdu_response(&nmbs, receive_buffer, 1);
+
+    if (receive_err == NMBS_ERROR_NONE){
+        qDebug() << QString("0x20 응답: ") << receive_buffer[0];
         return true;
     }
-    else {
-        qDebug() << "0x20 실패: " << err ;
+    else{
+        qDebug() << "0x20 응답 없음: " << receive_err ;
         return false;
     }
 }

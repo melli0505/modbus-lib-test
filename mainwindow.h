@@ -42,8 +42,6 @@ private:
     QVBoxLayout *layout;
     ItemDetailWidget *detailWidget;
 
-    Controller *controller;
-
 signals:
     bool requestRead(int slaveID, uint16_t address, uint16_t quantity);
 };

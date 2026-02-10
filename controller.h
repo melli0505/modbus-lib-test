@@ -10,12 +10,18 @@
 #include <QSerialPort>
 #include <QElapsedTimer>
 
+#define controller Controller::instance()
+
 class Controller : public QObject
 {
     Q_OBJECT
 public:
-    Controller();
-    ~Controller();
+    static Controller& instance()
+    {
+        static Controller _controller;
+        return _controller;
+    }
+
 
     bool setup_port(QSerialPort* _sPort);
 
@@ -26,10 +32,9 @@ public:
     bool sendCustom0x10(int slaveID, uint8_t data);
     bool sendCustom0x20(int slaveID);
 
-private slots:
-    void SLT_received();
-
 private:
+    Controller();
+    ~Controller();
     nmbs_t nmbs;
     nmbs_platform_conf platform_conf;
 

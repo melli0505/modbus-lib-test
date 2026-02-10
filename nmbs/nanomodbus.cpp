@@ -152,7 +152,6 @@ static nmbs_error recv(nmbs_t* nmbs, uint16_t count) {
     const int32_t ret =
             nmbs->platform.read(nmbs->msg.buf + nmbs->msg.buf_idx, count, nmbs->byte_timeout_ms, nmbs->platform.arg);
 
-    qDebug() << "[LIBRARY] recv return = " << ret << "/" << count;
     if (ret == count)
         return NMBS_ERROR_NONE;
 
@@ -327,7 +326,6 @@ static nmbs_error recv_msg_header(nmbs_t* nmbs, bool* first_byte_received) {
 
     if (nmbs->platform.transport == NMBS_TRANSPORT_RTU) {
         nmbs_error err = recv(nmbs, 1);
-        qDebug() << "[recv_msg_header1] recv" << err;
         nmbs->byte_timeout_ms = old_byte_timeout;
 
         if (err != NMBS_ERROR_NONE)
@@ -338,7 +336,6 @@ static nmbs_error recv_msg_header(nmbs_t* nmbs, bool* first_byte_received) {
         nmbs->msg.unit_id = get_1(nmbs);
 
         err = recv(nmbs, 1);
-        qDebug() << "[recv_msg_header2] recv" << err;
         if (err != NMBS_ERROR_NONE)
             return err;
 
@@ -436,7 +433,6 @@ static nmbs_error send_msg(nmbs_t* nmbs) {
 static nmbs_error recv_req_header(nmbs_t* nmbs, bool* first_byte_received) {
 
     const nmbs_error err = recv_msg_header(nmbs, first_byte_received);
-    qDebug() << "[recv_req_header]" << err;
     if (err != NMBS_ERROR_NONE)
         return err;
 
@@ -481,11 +477,8 @@ static nmbs_error recv_res_header(nmbs_t* nmbs) {
     const uint8_t req_unit_id = nmbs->msg.unit_id;
     const uint8_t req_fc = nmbs->msg.fc;
 
-    qDebug() << "[recv_res_header] : transaction id =" << req_transaction_id << "/ unit id =" << req_unit_id;
-
     bool first_byte_received = false;
     nmbs_error err = recv_msg_header(nmbs, &first_byte_received);
-    qDebug() << "[recv_res_header]" << err;
     if (err != NMBS_ERROR_NONE)
         return err;
 
@@ -495,7 +488,6 @@ static nmbs_error recv_res_header(nmbs_t* nmbs) {
     }
 
     if (nmbs->platform.transport == NMBS_TRANSPORT_RTU && nmbs->msg.unit_id != req_unit_id)
-        qDebug() << "[recv_res_header] msg unit id / req unit id : " << nmbs->msg.unit_id << req_unit_id;
         return NMBS_ERROR_INVALID_UNIT_ID;
 
     if (nmbs->msg.fc != req_fc) {
@@ -591,7 +583,6 @@ static nmbs_error recv_read_discrete_res(nmbs_t* nmbs, nmbs_bitfield values) {
 static nmbs_error recv_read_registers_res(nmbs_t* nmbs, uint16_t quantity, uint16_t* registers) {
     nmbs_error err = recv_res_header(nmbs);
 
-    qDebug() << "[recv_read_registers_res] err =" << err;
     if (err != NMBS_ERROR_NONE)
         return err;
 
