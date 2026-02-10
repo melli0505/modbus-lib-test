@@ -20,7 +20,7 @@ SOURCES += \
     itemdetailwidget.cpp \
     main.cpp \
     mainwindow.cpp \
-    nanomodbus.cpp \
+    nmbs/nanomodbus.cpp \
     scrollareaex.cpp \
     serialworker.cpp
 
@@ -30,7 +30,7 @@ HEADERS += \
     devicelist.h \
     itemdetailwidget.h \
     mainwindow.h \
-    nanomodbus.h \
+    nmbs/nanomodbus.h \
     scrollareaex.h \
     serialworker.h
 

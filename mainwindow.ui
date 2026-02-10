@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Setting RS485 Sensor Slave ID</string>
   </property>
   <property name="styleSheet">
    <string notr="true">#centralwidget {

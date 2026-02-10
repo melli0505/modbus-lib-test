@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setupUI();
 
-    this->setWindowTitle("Setting RS485 Sensor Slave ID");
-
     selectedItem = {-1, "no", "no"};
 
     controller = new Controller();
